@@ -155,87 +155,86 @@ public class Scheduler extends Thread
                 if ( queue0.size() != 0 )
                 { //Check if queue has received any arguments
 
-                    TCB currentTCB = (TCB) queue0.firstElement(); //Grab first TCB from queue
-                    current = currentTCB.getThread();   //Get thread from TCB
-                    if (current != null)  //Thread has not started running yet
+                    TCB currentTCB = (TCB) queue0.firstElement(); 
+                    current = currentTCB.getThread();   
+                    if (current != null)  
                     {
-                        current.start(); //Run thread
+                        current.start(); 
                     }
-                        schedulerSleep(); //Sleep for 500 ms
-                        // System.out.println("* * * Context Switch * * * ");
-                    if (currentTCB.getTerminated()) //Check if thread is done executing
+                        schedulerSleep(); 
+           
+                    if (currentTCB.getTerminated()) 
                     {
-                        queue0.remove(currentTCB); //Remove thread from queue
-                        returnTid(currentTCB.getTid()); //Free up Tid slot in
+                        queue0.remove(currentTCB); 
+                        returnTid(currentTCB.getTid()); 
                     }
                     else
                     {
                         current.suspend();
-                        queue0.remove(currentTCB); // rotate this TCB to the end
+                        queue0.remove(currentTCB); 
                         queue1.add(currentTCB);
                     }
                         continue;
                 }
                 else if (queue1.size() != 0)
                 {
-                    TCB currentTCB = (TCB) queue1.firstElement(); //grab first element from queue1
+                    TCB currentTCB = (TCB) queue1.firstElement(); 
                     current = currentTCB.getThread();
                     if (current != null && current.isAlive())
                        {
                            current.resume();
                        }
                     //Sleep for 500ms
-                    schedulerSleep(); //Sleep for 500ms
-                    count1++; //Increment count1
+                    schedulerSleep(); 
+                    count1++; 
                     if (currentTCB.getTerminated())
                     {
-                        count1 = 0;  //Reset count1
-                        queue1.remove(currentTCB); //Remove finished thread
-                        returnTid(currentTCB.getTid()); //Clear up TID spot
+                        count1 = 0;  
+                        queue1.remove(currentTCB); 
+                        returnTid(currentTCB.getTid()); 
                     }
-                   else if(count1 == 2) //Reached maximum amount of executions in q1
+                   else if(count1 == 2) 
                     {
                         if (current != null)
                         {
-                            if (current.isAlive()) //Suspend for queue2 to deal with
+                            if (current.isAlive()) 
                                 current.suspend();
-                            queue1.remove(currentTCB); //Remove from queue1
-                            queue2.add(currentTCB); //Add to next queue down
-                            count1 = 0; //Reset ccounter
+                            queue1.remove(currentTCB); 
+                            queue2.add(currentTCB); 
+                            count1 = 0; 
                         }
                     }
-                    //Check queue0
+
                     continue;
                 }
                 else if (queue2.size() != 0)
                 {
-                    TCB currentTCB = (TCB) queue2.firstElement(); //grab first element from queue1
+                    TCB currentTCB = (TCB) queue2.firstElement(); 
                     current = currentTCB.getThread();
                     if (current != null && current.isAlive())
                     {
                             current.resume();
                     }
-                    //4 quantums
-                    //Run for 4 quantums, check queue0 and queue1 between each one
+
                     schedulerSleep();
                     count2++;
-                    if(currentTCB.getTerminated()) //Check if thread has executed
+                    if(currentTCB.getTerminated()) 
                     {
                         queue2.remove(currentTCB);
-                        count2 = 0; //Reset counter
-                        returnTid(currentTCB.getTid()); //Clear up TID
-                        continue; //Check queue0
+                        count2 = 0; 
+                        returnTid(currentTCB.getTid()); 
+                        continue; 
                     }
-                    if(count2 == 4) //Reached maximum amount of executions in q4
+                    if(count2 == 4) 
                     {
                         synchronized (queue2)
                         {
                             if (current != null && current.isAlive())
                                 current.suspend();
-                            queue2.remove(currentTCB); // Remove thread from queue2
-                            queue2.add(currentTCB); // Add thread to end of queue2
-                            count2 = 0; //Reset counter
-                            continue; //Check queue0
+                            queue2.remove(currentTCB); 
+                            queue2.add(currentTCB); 
+                            count2 = 0; 
+                            continue; 
                         }
                     }
                 }
